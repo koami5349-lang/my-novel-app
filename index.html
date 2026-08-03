@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sunflower Novels - Writer & Reader</title>
-  <!-- Telegram Web App SDK -->
+  <title>Sunflower Novels</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -13,6 +12,7 @@
       --button-color: var(--tg-theme-button-color, #0088cc);
       --button-text-color: var(--tg-theme-button-text-color, #ffffff);
       --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+      --font-size: 16px;
     }
 
     body {
@@ -22,10 +22,29 @@
       margin: 0;
       padding: 16px;
       box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
     }
 
-    h2, h3 {
-      margin-top: 0;
+    /* Controls Bar (Font Size & Theme Switcher) */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--secondary-bg);
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .font-controls button, .theme-btn {
+      background-color: var(--button-color);
+      color: var(--button-text-color);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 4px;
     }
 
     .card {
@@ -52,7 +71,7 @@
       resize: vertical;
     }
 
-    button {
+    .action-btn {
       width: 100%;
       background-color: var(--button-color);
       color: var(--button-text-color);
@@ -64,10 +83,6 @@
       cursor: pointer;
     }
 
-    button:active {
-      opacity: 0.8;
-    }
-
     .toc-list {
       list-style: none;
       padding: 0;
@@ -76,15 +91,11 @@
 
     .toc-item {
       padding: 12px;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
-    }
-
-    .toc-item:last-child {
-      border-bottom: none;
     }
 
     .chapter-view {
@@ -94,58 +105,90 @@
     .back-btn {
       background-color: transparent;
       color: var(--button-color);
-      text-align: left;
+      border: none;
       padding: 0;
       margin-bottom: 12px;
       font-size: 14px;
-      width: auto;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #viewContent {
+      font-size: var(--font-size);
+      white-space: pre-line;
+      line-height: 1.8;
+    }
+
+    /* Dark Mode Theme Classes */
+    body.dark-mode {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --secondary-bg: #1e1e1e;
     }
   </style>
 </head>
 <body>
 
-  <!-- စာရေးသည့် အပိုင်း (Writer Form) -->
+  <!-- Controls Bar: Font Size & Theme Adjuster -->
+  <div class="controls-bar">
+    <div class="font-controls">
+      <span>စာလုံးဆိုဒ်: </span>
+      <button onclick="changeFontSize(-2)">A-</button>
+      <button onclick="changeFontSize(2)">A+</button>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">🌙 / ☀️ Mode</button>
+  </div>
+
+  <!-- စာရေးသည့် အပိုင်း -->
   <div class="card" id="writerSection">
-    <h3>✍️ အခန်းသစ် ရေးသားရန်</h3>
+    <h3 style="margin-top: 0;">✍️ အခန်းသစ် ရေးသားရန်</h3>
     <label>အခန်း ခေါင်းစဉ် (Title):</label>
     <input type="text" id="chapterTitle" placeholder="ဥပမာ - Chapter 1: အစပြုခြင်း">
     
     <label>စာမူ အပြည့်အစုံ (Content):</label>
     <textarea id="chapterContent" placeholder="ဒီနေရာမှာ စာရေးပါ..."></textarea>
     
-    <button onclick="saveChapter()">Publish လုပ်မည်</button>
+    <button class="action-btn" onclick="saveChapter()">Publish လုပ်မည်</button>
   </div>
 
-  <!-- မာတိကာ အပိုင်း (Table of Contents) -->
+  <!-- မာတိကာ အပိုင်း -->
   <div class="card" id="tocSection">
-    <h3>📚 မာတိကာ (Chapters)</h3>
-    <ul class="toc-list" id="tocList">
-      <!-- မာတိကာများ ဒီနေရာမှာ အလိုအလျောက် ပေါ်လာမည် -->
-    </ul>
+    <h3 style="margin-top: 0;">📚 မာတိကာ (Chapters)</h3>
+    <ul class="toc-list" id="tocList"></ul>
   </div>
 
-  <!-- စာဖတ်သည့် အပိုင်း (Reader View) -->
+  <!-- စာဖတ်သည့် အပိုင်း -->
   <div class="card chapter-view" id="readerSection">
     <button class="back-btn" onclick="showTOC()">← မာတိကာသို့ ပြန်သွားရန်</button>
-    <h2 id="viewTitle"></h2>
-    <hr style="border: 0.5px solid #eee;">
-    <p id="viewContent" style="white-space: pre-line; line-height: 1.6;"></p>
+    <h2 id="viewTitle" style="margin-top: 0;"></h2>
+    <hr style="border: 0.5px solid rgba(0,0,0,0.1);">
+    <p id="viewContent"></p>
   </div>
 
   <script>
-    // Telegram Web App SDK ကို အလုပ်လုပ်ခိုင်းခြင်း
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Screen အပြည့်ပွင့်ရန်
+    tg.expand();
 
-    // Local Storage မှ သိမ်းထားသော စာမူများ ယူရန်
+    let currentFontSize = 16;
+
+    // Font Size ပြောင်းလဲပေးသည့် Function
+    function changeFontSize(delta) {
+      currentFontSize = Math.min(Math.max(12, currentFontSize + delta), 28);
+      document.documentElement.style.setProperty('--font-size', currentFontSize + 'px');
+    }
+
+    // Light/Dark Theme ပြောင်းပေးသည့် Function
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
     let chapters = JSON.parse(localStorage.getItem('sunflower_chapters')) || [
       {
         title: "Chapter 1: နိဒါန်း",
-        content: "ဒါကတော့ Sunflower Novels ရဲ့ ပထမဆုံး နမူနာ စာမူ ဖြစ်ပါတယ်။"
+        content: "ဒါကတော့ Sunflower Novels ရဲ့ ပထမဆုံး နမူနာ စာမူ ဖြစ်ပါတယ်။ Font Size ခလုတ်များနှင့် Theme ပြောင်းစနစ်ပါဝင်လာပါပြီ။"
       }
     ];
 
-    // မာတိကာကို Screen ပေါ်တင်ပေးသည့် Function
     function renderTOC() {
       const tocList = document.getElementById('tocList');
       tocList.innerHTML = '';
@@ -164,7 +207,6 @@
       });
     }
 
-    // စာမူသစ် သိမ်းဆည်းခြင်း
     function saveChapter() {
       const title = document.getElementById('chapterTitle').value.trim();
       const content = document.getElementById('chapterContent').value.trim();
@@ -177,7 +219,6 @@
       chapters.push({ title, content });
       localStorage.setItem('sunflower_chapters', JSON.stringify(chapters));
 
-      // Input များကို ရှင်းထုတ်ခြင်း
       document.getElementById('chapterTitle').value = '';
       document.getElementById('chapterContent').value = '';
 
@@ -185,7 +226,6 @@
       alert('အခန်းသစ် တင်ပြီးပါပြီ။');
     }
 
-    // Chapter တစ်ခုချင်းစီ ဖတ်ရန်
     function openChapter(index) {
       document.getElementById('writerSection').style.display = 'none';
       document.getElementById('tocSection').style.display = 'none';
@@ -195,14 +235,12 @@
       document.getElementById('viewContent').innerText = chapters[index].content;
     }
 
-    // မာတိကာသို့ ပြန်သွားရန်
     function showTOC() {
       document.getElementById('writerSection').style.display = 'block';
       document.getElementById('tocSection').style.display = 'block';
       document.getElementById('readerSection').style.display = 'none';
     }
 
-    // စတင်ချိန်တွင် မာတိကာ ပြသရန်
     renderTOC();
   </script>
 </body>
