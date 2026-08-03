@@ -8,7 +8,10 @@
   <meta http-equiv="Expires" content="0" />
   <title>Novel Reader</title>
   
+  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- Firebase JS SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -45,22 +48,28 @@
 
     header {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       padding-bottom: 10px;
       border-bottom: 2px solid var(--border-color);
       margin-bottom: 15px;
     }
 
-    .controls button {
+    .controls button, .back-btn {
       background: var(--card-bg);
       color: var(--text-color);
       border: 1px solid var(--border-color);
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
-      margin-left: 5px;
+    }
+
+    .back-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      display: none; /* စာဖတ်နေချိန်မှ ပေါ်မည် */
     }
 
     .admin-panel {
@@ -73,42 +82,86 @@
 
     .admin-panel input, .admin-panel textarea {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-bottom: 10px;
       border: 1px solid var(--border-color);
       border-radius: 5px;
       box-sizing: border-box;
       background: var(--bg-color);
       color: var(--text-color);
+      font-family: inherit;
     }
 
     .admin-panel button {
       background: var(--primary-color);
       color: white;
       border: none;
-      padding: 10px 15px;
+      padding: 12px 15px;
       border-radius: 5px;
       cursor: pointer;
       width: 100%;
       font-size: 1rem;
+      font-weight: bold;
     }
 
-    .chapter-card {
+    /* Table of Contents (Wattpad Style List) */
+    .toc-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+
+    .chapter-item {
       background: var(--card-bg);
-      padding: 15px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.1s, border-color 0.2s;
+    }
+
+    .chapter-item:hover {
+      border-color: var(--primary-color);
+    }
+
+    .chapter-item:active {
+      transform: scale(0.98);
+    }
+
+    .chapter-item-title {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .arrow {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* Chapter Full Content View */
+    #readerView {
+      display: none;
+      background: var(--card-bg);
+      padding: 20px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      margin-bottom: 15px;
     }
 
-    .chapter-title {
-      font-size: 1.2rem;
+    .reader-title {
+      font-size: 1.3rem;
       font-weight: bold;
       color: var(--primary-color);
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
     }
 
-    .chapter-content {
+    .reader-content {
       line-height: 1.8;
       white-space: pre-line;
     }
@@ -117,6 +170,7 @@
       text-align: center;
       font-style: italic;
       margin-top: 20px;
+      color: #777;
     }
   </style>
 </head>
@@ -124,6 +178,7 @@
 
 <div class="container">
   <header>
+    <button id="backBtn" class="back-btn" onclick="showToc()">← အခန်းများ</button>
     <div class="controls">
       <button onclick="changeFontSize(-1)">A-</button>
       <button onclick="changeFontSize(1)">A+</button>
@@ -131,7 +186,8 @@
     </div>
   </header>
 
-  <div class="admin-panel">
+  <!-- စာမူတင်သည့် Admin Panel -->
+  <div class="admin-panel" id="adminPanel">
     <h3>စာမူအသစ် တင်ရန်</h3>
     <input type="text" id="chapTitle" placeholder="အခန်းခေါင်းစဉ် (ဥပမာ - အခန်း ၁)">
     <textarea id="chapContent" rows="5" placeholder="စာမူအပြည့်အစုံ ရေးထည့်ပါ..."></textarea>
@@ -139,7 +195,18 @@
   </div>
 
   <div id="loading">စာမူများ ရယူနေပါသည်...</div>
-  <div id="chaptersContainer"></div>
+
+  <!-- Table of Contents (အခန်းစာရင်း View) -->
+  <div id="tocView">
+    <div class="toc-title">📖 အခန်းများ စာရင်း</div>
+    <div id="tocContainer"></div>
+  </div>
+
+  <!-- စာမူအပြည့်အစုံ ဖတ်သည့် View -->
+  <div id="readerView">
+    <div id="readerTitle" class="reader-title"></div>
+    <div id="readerContent" class="reader-content"></div>
+  </div>
 </div>
 
 <script>
@@ -157,37 +224,70 @@
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
+  let chaptersData = {};
   let currentFontSize = 16;
 
+  // Firebase မှ စာမူများဆွဲယူခြင်း
   database.ref('chapters').on('value', (snapshot) => {
-    const container = document.getElementById('chaptersContainer');
+    const tocContainer = document.getElementById('tocContainer');
     const loading = document.getElementById('loading');
-    container.innerHTML = '';
+    tocContainer.innerHTML = '';
     loading.style.display = 'none';
 
-    const data = snapshot.val();
-    if (data) {
-      Object.keys(data).reverse().forEach(key => {
-        const item = data[key];
-        const card = document.createElement('div');
-        card.className = 'chapter-card';
-        card.innerHTML = `
-          <div class="chapter-title">${item.title}</div>
-          <div class="chapter-content" style="font-size: ${currentFontSize}px;">${item.content}</div>
+    chaptersData = snapshot.val() || {};
+
+    if (Object.keys(chaptersData).length > 0) {
+      // အခန်း ၁၊ အခန်း ၂ အစဉ်လိုက် ပြပေးရန် (သို့မဟုတ် တင်သည့်အစဉ်အတိုင်း)
+      Object.keys(chaptersData).forEach(key => {
+        const item = chaptersData[key];
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'chapter-item';
+        itemDiv.onclick = () => openChapter(key);
+        itemDiv.innerHTML = `
+          <span class="chapter-item-title">${item.title}</span>
+          <span class="arrow">ဖတ်ရန် ➔</span>
         `;
-        container.appendChild(card);
+        tocContainer.appendChild(itemDiv);
       });
     } else {
-      container.innerHTML = '<p style="text-align:center;">စာမူ မရှိသေးပါ။</p>';
+      tocContainer.innerHTML = '<p style="text-align:center; color: #888;">စာမူ မရှိသေးပါ။</p>';
     }
-  }, (error) => {
-    document.getElementById('loading').innerText = 'Database Rules ပိတ်နေပါသည်။ Firebase တွင် ပြန်ဖွင့်ပေးပါ။';
   });
 
+  // အခန်းတစ်ခန်းကို နှိပ်လိုက်သည့်အခါ စာမူဖွင့်ခြင်း
+  function openChapter(key) {
+    const item = chaptersData[key];
+    if (!item) return;
+
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('tocView').style.display = 'none';
+    document.getElementById('readerView').style.display = 'block';
+    document.getElementById('backBtn').style.display = 'inline-block';
+
+    document.getElementById('readerTitle').innerText = item.title;
+    const contentEl = document.getElementById('readerContent');
+    contentEl.innerText = item.content;
+    contentEl.style.fontSize = currentFontSize + 'px';
+
+    window.scrollTo(0, 0);
+  }
+
+  // အခန်းစာရင်း ပင်မစာမျက်နှာသို့ ပြန်သွားခြင်း
+  function showToc() {
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('tocView').style.display = 'block';
+    document.getElementById('readerView').style.display = 'none';
+    document.getElementById('backBtn').style.display = 'none';
+  }
+
+  // စာမူတင်သည့် Function
   function publishChapter() {
-    const title = document.getElementById('chapTitle').value.trim();
-    const content = document.getElementById('chapContent').value.trim();
+    const titleInput = document.getElementById('chapTitle');
+    const contentInput = document.getElementById('chapContent');
     const btn = document.getElementById('pubBtn');
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
 
     if (!title || !content) {
       alert('ခေါင်းစဉ်နှင့် စာမူ အပြည့်အစုံ ဖြည့်ပေးပါ။');
@@ -205,20 +305,21 @@
     }, (error) => {
       btn.disabled = false;
       btn.innerText = "Publish မူဝါဒဖြင့် တင်မည်";
+
       if (error) {
-        alert('စာမူတင်ခြင်း မအောင်မြင်ပါ။ Database Rules ကို စစ်ဆေးပါ။');
+        alert('စာမူတင်ခြင်း မအောင်မြင်ပါ။');
       } else {
-        document.getElementById('chapTitle').value = '';
-        document.getElementById('chapContent').value = '';
-        alert('စာမူအသစ်ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။');
+        titleInput.value = '';
+        contentInput.value = '';
+        alert('စာမူအသစ်ကို အောင်မြင်စွာ တက်သွားပါပြီ။');
       }
     });
   }
 
   function changeFontSize(step) {
     currentFontSize += step;
-    const contents = document.querySelectorAll('.chapter-content');
-    contents.forEach(el => el.style.fontSize = currentFontSize + 'px');
+    const contentEl = document.getElementById('readerContent');
+    if (contentEl) contentEl.style.fontSize = currentFontSize + 'px';
   }
 
   function toggleDarkMode() {
