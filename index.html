@@ -14,24 +14,26 @@
 
   <style>
     :root {
-      --bg-color: #12131C;
-      --card-bg: #1D1E2C;
-      --text-color: #E6E8EE;
-      --sub-text: #9499B1;
-      --accent-peach: #FFB088;
-      --border-color: #2D2F45;
-      --input-bg: #161724;
-      --danger-color: #FF6B6B;
+      --bg-color: #0b0c10;
+      --card-bg: #1f2833;
+      --text-color: #c5c6c7;
+      --sub-text: #8892b0;
+      --accent-glow: #66fcf1;
+      --accent-pink: #ff007f;
+      --border-color: #45a29e;
+      --input-bg: #0b0c10;
+      --danger-color: #ff4757;
     }
     body.light-mode {
-      --bg-color: #F5F6FA;
-      --card-bg: #FFFFFF;
-      --text-color: #1D1E2C;
-      --sub-text: #6B708D;
-      --accent-peach: #FF9463;
-      --border-color: #E2E4ED;
-      --input-bg: #EDEEF5;
-      --danger-color: #E63946;
+      --bg-color: #f0f4f8;
+      --card-bg: #ffffff;
+      --text-color: #102a43;
+      --sub-text: #486581;
+      --accent-glow: #00b4d8;
+      --accent-pink: #d90429;
+      --border-color: #9fb3c8;
+      --input-bg: #e2e8f0;
+      --danger-color: #e63946;
     }
     body {
       font-family: 'Noto Sans Myanmar', sans-serif;
@@ -42,17 +44,32 @@
     }
     .container { max-width: 650px; margin: 0 auto; }
     header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-    button, .back-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; font-family: inherit; }
-    .back-btn { background: var(--accent-peach); color: #12131C; border: none; display: none; }
-    .admin-panel { background: var(--card-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 24px; }
+    button, .back-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; font-family: inherit; box-shadow: 0 0 8px rgba(102, 252, 241, 0.2); }
+    .back-btn { background: var(--accent-glow); color: #0b0c10; border: none; display: none; }
+    
+    /* Admin Panel Glow Style */
+    .admin-panel { background: var(--card-bg); padding: 18px; border-radius: 16px; border: 2px solid var(--accent-glow); margin-bottom: 24px; box-shadow: 0 0 15px rgba(102, 252, 241, 0.3); display: none; }
     .admin-panel select, .admin-panel input, .admin-panel textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--input-bg); color: var(--text-color); font-family: inherit; box-sizing: border-box; }
-    .admin-panel button { background: var(--accent-peach); color: #12131C; border: none; width: 100%; padding: 12px; font-weight: bold; }
-    .novel-grid { display: grid; gap: 12px; }
-    .novel-card, .chapter-item { background: var(--card-bg); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .admin-panel button { background: var(--accent-glow); color: #0b0c10; border: none; width: 100%; padding: 12px; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 0 10px var(--accent-glow); }
+
+    /* Wattpad Bookshelf Grid Style with Glow */
+    .section-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 16px; color: var(--accent-glow); text-shadow: 0 0 8px rgba(102, 252, 241, 0.4); }
+    .novel-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .novel-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .novel-card:hover { transform: translateY(-3px); box-shadow: 0 0 12px var(--accent-glow); }
+    .novel-cover { width: 100%; height: 200px; object-fit: cover; background-color: var(--input-bg); }
+    .novel-info { padding: 12px; }
+    .novel-title { font-weight: bold; font-size: 1rem; margin-bottom: 4px; color: var(--text-color); }
+    .novel-desc { font-size: 0.8rem; color: var(--sub-text); }
+
+    /* Chapter List Style */
+    .chapter-item { background: var(--card-bg); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; box-shadow: 0 0 6px rgba(0,0,0,0.2); }
     .chapter-info { flex-grow: 1; display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-right: 10px; }
-    .arrow, .reader-title { color: var(--accent-peach); font-weight: bold; }
-    .delete-btn { background: var(--danger-color); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
-    #readerView { display: none; background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); }
+    .arrow { color: var(--accent-glow); font-weight: bold; }
+    .delete-btn { background: var(--danger-color); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; display: none; }
+
+    #readerView { display: none; background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+    .reader-title { color: var(--accent-glow); font-weight: bold; text-shadow: 0 0 6px rgba(102, 252, 241, 0.3); }
     .reader-content { line-height: 2; white-space: pre-line; }
     #loading { text-align: center; font-style: italic; margin-top: 20px; color: var(--sub-text); }
   </style>
@@ -69,12 +86,13 @@
     </div>
   </header>
 
+  <!-- Admin Panel (ရေးသူအတွက်သာ ပေါ်မည်) -->
   <div class="admin-panel" id="adminPanel">
-    <h3>✍️ စာမူအသစ် တင်ရန် (Google Sheets)</h3>
+    <h3>✍️ Write a story</h3>
     <select id="novelSelect">
-      <option value="novel1">ချူဆန်းရဲ့ကလေးများနေ့</option>
-      <option value="novel2">ဝတ္ထုအမှတ် (၂)</option>
-      <option value="novel3">ဝတ္ထုအမှတ် (၃)</option>
+      <option value="novel1">ဝတ္ထုအပုဒ် (၁)</option>
+      <option value="novel2">ဝတ္ထုအပုဒ် (၂)</option>
+      <option value="novel3">ဝတ္ထုအပုဒ် (၃)</option>
     </select>
     <input type="text" id="chapTitle" placeholder="အခန်းခေါင်းစဉ် (ဥပမာ - နိဒါန်း)">
     <textarea id="chapContent" rows="5" placeholder="စာမူအပြည့်အစုံ ရေးထည့်ပါ..."></textarea>
@@ -83,26 +101,39 @@
 
   <div id="loading">ဒေတာများ ရယူနေပါသည်...</div>
 
+  <!-- Bookshelf / Reader View -->
   <div id="bookshelfView">
-    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 14px; color: var(--accent-peach);">📚 ဝတ္ထုများ စာရင်း</div>
+    <div class="section-title">📚 Sunflower niki’s works</div>
     <div class="novel-grid">
-      <div class="novel-card" onclick="openNovel('novel1', 'ချူဆန်းရဲ့ကလေးများနေ့')">
-        <div><strong>ချူဆန်းရဲ့ကလေးများနေ့</strong><div style="font-size:0.85rem; color:var(--sub-text);">ဖတ်ရန် နှိပ်ပါ</div></div>
-        <span class="arrow">➔</span>
+      <!-- Novel 1 -->
+      <div class="novel-card" onclick="openNovel('novel1', 'ဝတ္ထုအပုဒ် (၁)')">
+        <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300" class="novel-cover" alt="Cover">
+        <div class="novel-info">
+          <div class="novel-title">ဝတ္ထုအပုဒ် (၁)</div>
+          <div class="novel-desc">ဖတ်ရန် နှိပ်ပါ</div>
+        </div>
       </div>
-      <div class="novel-card" onclick="openNovel('novel2', 'ဝတ္ထုအမှတ် (၂)')">
-        <div><strong>ဝတ္ထုအမှတ် (၂)</strong><div style="font-size:0.85rem; color:var(--sub-text);">ဖတ်ရန် နှိပ်ပါ</div></div>
-        <span class="arrow">➔</span>
+      <!-- Novel 2 -->
+      <div class="novel-card" onclick="openNovel('novel2', 'ဝတ္ထုအပုဒ် (၂)')">
+        <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300" class="novel-cover" alt="Cover">
+        <div class="novel-info">
+          <div class="novel-title">ဝတ္ထုအပုဒ် (၂)</div>
+          <div class="novel-desc">ဖတ်ရန် နှိပ်ပါ</div>
+        </div>
       </div>
-      <div class="novel-card" onclick="openNovel('novel3', 'ဝတ္ထုအမှတ် (၃)')">
-        <div><strong>ဝတ္ထုအမှတ် (၃)</strong><div style="font-size:0.85rem; color:var(--sub-text);">ဖတ်ရန် နှိပ်ပါ</div></div>
-        <span class="arrow">➔</span>
+      <!-- Novel 3 -->
+      <div class="novel-card" onclick="openNovel('novel3', 'ဝတ္ထုအပုဒ် (၃)')">
+        <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=300" class="novel-cover" alt="Cover">
+        <div class="novel-info">
+          <div class="novel-title">ဝတ္ထုအပုဒ် (၃)</div>
+          <div class="novel-desc">ဖတ်ရန် နှိပ်ပါ</div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="tocView" style="display: none;">
-    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 14px; color: var(--accent-peach);" id="selectedNovelTitle">📖 အခန်းများ</div>
+    <div class="section-title" id="selectedNovelTitle">📖 အခန်းများ</div>
     <div id="tocContainer"></div>
   </div>
 
@@ -113,7 +144,6 @@
 </div>
 
 <script>
-  // လင့်ခ်အသစ် ထည့်သွင်းပြီးပါပြီ
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2fDCcxt4RieopSm6OsmGMJk1GgbhHtXjVrnzVOAfZQz9p0IbyAJ0TLMvtbuUH305Seg/exec";
 
   let allChapters = [];
@@ -123,6 +153,22 @@
 
   const tg = window.Telegram.WebApp;
   tg.expand();
+
+  // Admin ID ထည့်သွင်းပြီးပါပြီ
+  const ADMIN_ID = 8772368902; 
+
+  let isAdmin = false;
+
+  function checkAdmin() {
+    const user = tg.initDataUnsafe?.user;
+    if (user && user.id === ADMIN_ID) {
+      isAdmin = true;
+      document.getElementById('adminPanel').style.display = 'block';
+    } else {
+      isAdmin = false;
+      document.getElementById('adminPanel').style.display = 'none';
+    }
+  }
 
   async function fetchChapters() {
     try {
@@ -136,8 +182,10 @@
   }
 
   fetchChapters();
+  checkAdmin();
 
   window.publishChapter = async function() {
+    if (!isAdmin) return;
     const novelId = document.getElementById('novelSelect').value;
     const title = document.getElementById('chapTitle').value.trim();
     const content = document.getElementById('chapContent').value.trim();
@@ -170,6 +218,7 @@
   };
 
   window.deleteChapter = async function(id) {
+    if (!isAdmin) return;
     if (!confirm("ဒီအခန်းကို ဖျက်မှာ သေချာပါသလား?")) return;
 
     try {
@@ -188,7 +237,9 @@
     currentNovelId = novelId;
     document.getElementById('selectedNovelTitle').innerText = "📖 " + title;
     document.getElementById('bookshelfView').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'none';
+    if (isAdmin) {
+      document.getElementById('adminPanel').style.display = 'none';
+    }
     document.getElementById('tocView').style.display = 'block';
     document.getElementById('backBtn').style.display = 'inline-block';
     viewStack.push("toc");
@@ -209,7 +260,7 @@
             <span>${item.title}</span>
             <span class="arrow">ဖတ်ရန် ➔</span>
           </div>
-          <button class="delete-btn" onclick="deleteChapter('${item.id}')">ဖျက်ရန်</button>
+          <button class="delete-btn" style="display: ${isAdmin ? 'block' : 'none'};" onclick="deleteChapter('${item.id}')">ဖျက်ရန်</button>
         `;
         div.querySelector('.chapter-info').onclick = () => openChapter(item.title, item.content);
         container.appendChild(div);
@@ -238,7 +289,9 @@
     } else if (lastView === "toc") {
       document.getElementById('tocView').style.display = 'none';
       document.getElementById('bookshelfView').style.display = 'block';
-      document.getElementById('adminPanel').style.display = 'block';
+      if (isAdmin) {
+        document.getElementById('adminPanel').style.display = 'block';
+      }
       document.getElementById('backBtn').style.display = 'none';
       currentNovelId = "";
     }
