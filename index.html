@@ -6,30 +6,31 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Novel Reader</title>
+  <title>Sunflower Novels</title>
   
-  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <!-- Firebase JS SDKs (Updated Links) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <style>
     :root {
-      --bg-color: #f4f4f9;
-      --text-color: #333333;
-      --card-bg: #ffffff;
-      --border-color: #ddd;
-      --primary-color: #0088cc;
+      --bg-color: #12131C;
+      --card-bg: #1D1E2C;
+      --text-color: #E6E8EE;
+      --sub-text: #9499B1;
+      --accent-peach: #FFB088;
+      --accent-hover: #FFA070;
+      --border-color: #2D2F45;
+      --input-bg: #161724;
     }
 
-    body.dark-mode {
-      --bg-color: #181818;
-      --text-color: #e0e0e0;
-      --card-bg: #242424;
-      --border-color: #444444;
-      --primary-color: #64b5f6;
+    body.light-mode {
+      --bg-color: #F5F6FA;
+      --card-bg: #FFFFFF;
+      --text-color: #1D1E2C;
+      --sub-text: #6B708D;
+      --accent-peach: #FF9463;
+      --accent-hover: #E87E4D;
+      --border-color: #E2E4ED;
+      --input-bg: #EDEEF5;
     }
 
     body {
@@ -37,12 +38,12 @@
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
-      padding: 15px;
+      padding: 16px;
       transition: background-color 0.3s, color 0.3s;
     }
 
     .container {
-      max-width: 700px;
+      max-width: 650px;
       margin: 0 auto;
     }
 
@@ -50,79 +51,130 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--border-color);
-      margin-bottom: 15px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
     }
 
     .controls button, .back-btn {
       background: var(--card-bg);
       color: var(--text-color);
       border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 5px;
+      padding: 6px 14px;
+      border-radius: 20px;
       cursor: pointer;
       font-weight: bold;
+      transition: all 0.2s;
     }
 
     .back-btn {
-      background: var(--primary-color);
-      color: white;
+      background: var(--accent-peach);
+      color: #12131C;
       border: none;
       display: none;
     }
 
     .admin-panel {
       background: var(--card-bg);
-      padding: 15px;
-      border-radius: 8px;
+      padding: 18px;
+      border-radius: 16px;
       border: 1px solid var(--border-color);
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
-    .admin-panel input, .admin-panel textarea {
+    .admin-panel h3 {
+      margin-top: 0;
+      color: var(--accent-peach);
+      font-size: 1.1rem;
+    }
+
+    .admin-panel select, .admin-panel input, .admin-panel textarea {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
       border: 1px solid var(--border-color);
-      border-radius: 5px;
+      border-radius: 10px;
       box-sizing: border-box;
-      background: var(--bg-color);
+      background: var(--input-bg);
       color: var(--text-color);
       font-family: inherit;
     }
 
     .admin-panel button {
-      background: var(--primary-color);
-      color: white;
+      background: var(--accent-peach);
+      color: #12131C;
       border: none;
-      padding: 12px 15px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 10px;
       cursor: pointer;
       width: 100%;
       font-size: 1rem;
       font-weight: bold;
+      transition: background 0.2s;
     }
 
     .admin-panel button:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
-    /* Table of Contents List */
-    .toc-title {
-      font-size: 1.1rem;
+    .section-title {
+      font-size: 1.2rem;
       font-weight: bold;
-      margin-bottom: 10px;
-      color: var(--primary-color);
+      margin-bottom: 14px;
+      color: var(--accent-peach);
     }
 
+    /* Novel Cards (Bookshelf) */
+    .novel-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .novel-card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.1s, border-color 0.2s;
+    }
+
+    .novel-card:hover {
+      border-color: var(--accent-peach);
+    }
+
+    .novel-card:active {
+      transform: scale(0.98);
+    }
+
+    .novel-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .novel-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .novel-tag {
+      font-size: 0.85rem;
+      color: var(--sub-text);
+      margin-top: 4px;
+    }
+
+    /* Chapter List */
     .chapter-item {
       background: var(--card-bg);
-      padding: 12px 15px;
-      border-radius: 6px;
+      padding: 14px 16px;
+      border-radius: 10px;
       border: 1px solid var(--border-color);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
@@ -133,36 +185,31 @@
       transform: scale(0.98);
     }
 
-    .chapter-item-title {
-      font-weight: bold;
-      font-size: 1rem;
-    }
-
     .arrow {
-      color: #888;
-      font-size: 0.9rem;
+      color: var(--accent-peach);
+      font-weight: bold;
     }
 
     /* Reader View */
     #readerView {
       display: none;
       background: var(--card-bg);
-      padding: 20px;
-      border-radius: 8px;
+      padding: 24px;
+      border-radius: 16px;
       border: 1px solid var(--border-color);
     }
 
     .reader-title {
       font-size: 1.3rem;
       font-weight: bold;
-      color: var(--primary-color);
-      margin-bottom: 15px;
+      color: var(--accent-peach);
+      margin-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 8px;
+      padding-bottom: 10px;
     }
 
     .reader-content {
-      line-height: 1.8;
+      line-height: 1.9;
       white-space: pre-line;
     }
 
@@ -170,7 +217,7 @@
       text-align: center;
       font-style: italic;
       margin-top: 20px;
-      color: #777;
+      color: var(--sub-text);
     }
   </style>
 </head>
@@ -178,7 +225,7 @@
 
 <div class="container">
   <header>
-    <button id="backBtn" class="back-btn" onclick="showToc()">← အခန်းများ</button>
+    <button id="backBtn" class="back-btn" onclick="goBack()">← ပြန်ထွက်မည်</button>
     <div class="controls">
       <button onclick="changeFontSize(-1)">A-</button>
       <button onclick="changeFontSize(1)">A+</button>
@@ -186,27 +233,66 @@
     </div>
   </header>
 
+  <!-- Admin Panel -->
   <div class="admin-panel" id="adminPanel">
-    <h3>စာမူအသစ် တင်ရန်</h3>
+    <h3>✍️ စာမူအသစ် တင်ရန်</h3>
+    <select id="novelSelect">
+      <option value="novel1">သတ်ဖြတ်ခြင်းအမိန့်တော်</option>
+      <option value="novel2">ဝတ္ထုအမှတ် (၂)</option>
+      <option value="novel3">ဝတ္ထုအမှတ် (၃)</option>
+    </select>
     <input type="text" id="chapTitle" placeholder="အခန်းခေါင်းစဉ် (ဥပမာ - အခန်း ၁)">
     <textarea id="chapContent" rows="5" placeholder="စာမူအပြည့်အစုံ ရေးထည့်ပါ..."></textarea>
-    <button id="pubBtn" onclick="publishChapter()">Publish မူဝါဒဖြင့် တင်မည်</button>
+    <button id="pubBtn" onclick="publishChapter()">Publish</button>
   </div>
 
   <div id="loading">စာမူများ ရယူနေပါသည်...</div>
 
-  <div id="tocView">
-    <div class="toc-title">📖 အခန်းများ စာရင်း</div>
+  <!-- 1. Bookshelf View (ဝတ္ထုများ စာရင်း) -->
+  <div id="bookshelfView">
+    <div class="section-title">📚 ဝတ္ထုများ စာရင်း</div>
+    <div class="novel-grid">
+      <div class="novel-card" onclick="openNovel('novel1', 'သတ်ဖြတ်ခြင်းအမိန့်တော်')">
+        <div class="novel-info">
+          <span class="novel-title">သတ်ဖြတ်ခြင်းအမိန့်တော်</span>
+          <span class="novel-tag">ဝတ္ထုဖတ်ရန် နှိပ်ပါ</span>
+        </div>
+        <span class="arrow">➔</span>
+      </div>
+      <div class="novel-card" onclick="openNovel('novel2', 'ဝတ္ထုအမှတ် (၂)')">
+        <div class="novel-info">
+          <span class="novel-title">ဝတ္ထုအမှတ် (၂)</span>
+          <span class="novel-tag">ဝတ္ထုဖတ်ရန် နှိပ်ပါ</span>
+        </div>
+        <span class="arrow">➔</span>
+      </div>
+      <div class="novel-card" onclick="openNovel('novel3', 'ဝတ္ထုအမှတ် (၃)')">
+        <div class="novel-info">
+          <span class="novel-title">ဝတ္ထုအမှတ် (၃)</span>
+          <span class="novel-tag">ဝတ္ထုဖတ်ရန် နှိပ်ပါ</span>
+        </div>
+        <span class="arrow">➔</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Chapter List View -->
+  <div id="tocView" style="display: none;">
+    <div class="section-title" id="selectedNovelTitle">📖 အခန်းများ စာရင်း</div>
     <div id="tocContainer"></div>
   </div>
 
+  <!-- 3. Reader View -->
   <div id="readerView">
     <div id="readerTitle" class="reader-title"></div>
     <div id="readerContent" class="reader-content"></div>
   </div>
 </div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
   const firebaseConfig = {
     apiKey: "AIzaSyBDR13h_lXr2lIuYYgL89xXy51kYqVU-8Y",
     authDomain: "my-novel-app-944d6.firebaseapp.com",
@@ -218,40 +304,23 @@
     measurementId: "G-SP70JNCDKB"
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
 
-  let chaptersData = {};
+  let allNovelsData = {};
+  let currentNovelId = "";
   let currentFontSize = 16;
+  let viewStack = ["bookshelf"];
 
-  database.ref('chapters').on('value', (snapshot) => {
-    const tocContainer = document.getElementById('tocContainer');
-    const loading = document.getElementById('loading');
-    tocContainer.innerHTML = '';
-    loading.style.display = 'none';
-
-    chaptersData = snapshot.val() || {};
-
-    if (Object.keys(chaptersData).length > 0) {
-      Object.keys(chaptersData).forEach(key => {
-        const item = chaptersData[key];
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'chapter-item';
-        itemDiv.onclick = () => openChapter(key);
-        itemDiv.innerHTML = `
-          <span class="chapter-item-title">${item.title}</span>
-          <span class="arrow">ဖတ်ရန် ➔</span>
-        `;
-        tocContainer.appendChild(itemDiv);
-      });
-    } else {
-      tocContainer.innerHTML = '<p style="text-align:center; color: #888;">စာမူ မရှိသေးပါ။</p>';
-    }
-  }, (error) => {
-    document.getElementById('loading').innerText = 'Database အမှားအယွင်း ရှိနေပါသည်။';
+  const novelsRef = ref(database, 'novels');
+  onValue(novelsRef, (snapshot) => {
+    document.getElementById('loading').style.display = 'none';
+    allNovelsData = snapshot.val() || {};
+    if (currentNovelId) renderChapters(currentNovelId);
   });
 
-  function publishChapter() {
+  window.publishChapter = function() {
+    const novelId = document.getElementById('novelSelect').value;
     const titleInput = document.getElementById('chapTitle');
     const contentInput = document.getElementById('chapContent');
     const btn = document.getElementById('pubBtn');
@@ -267,56 +336,93 @@
     btn.disabled = true;
     btn.innerText = "တင်နေပါသည်...";
 
-    database.ref('chapters').push({
+    push(ref(database, `novels/${novelId}/chapters`), {
       title: title,
       content: content,
       timestamp: Date.now()
     }).then(() => {
       btn.disabled = false;
-      btn.innerText = "Publish မူဝါဒဖြင့် တင်မည်";
+      btn.innerText = "Publish";
       titleInput.value = '';
       contentInput.value = '';
       alert('စာမူအသစ်ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။');
     }).catch((error) => {
       btn.disabled = false;
-      btn.innerText = "Publish မူဝါဒဖြင့် တင်မည်";
+      btn.innerText = "Publish";
       alert('စာမူတင်ခြင်း မအောင်မြင်ပါ: ' + error.message);
     });
-  }
+  };
 
-  function openChapter(key) {
-    const item = chaptersData[key];
-    if (!item) return;
-
+  window.openNovel = function(novelId, title) {
+    currentNovelId = novelId;
+    document.getElementById('selectedNovelTitle').innerText = "📖 " + title;
+    document.getElementById('bookshelfView').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('tocView').style.display = 'none';
-    document.getElementById('readerView').style.display = 'block';
+    document.getElementById('tocView').style.display = 'block';
     document.getElementById('backBtn').style.display = 'inline-block';
 
+    viewStack.push("toc");
+    renderChapters(novelId);
+  };
+
+  function renderChapters(novelId) {
+    const container = document.getElementById('tocContainer');
+    container.innerHTML = '';
+    const chapters = allNovelsData[novelId]?.chapters || {};
+
+    if (Object.keys(chapters).length > 0) {
+      Object.keys(chapters).forEach(key => {
+        const item = chapters[key];
+        const div = document.createElement('div');
+        div.className = 'chapter-item';
+        div.onclick = () => openChapter(item);
+        div.innerHTML = `
+          <span>${item.title}</span>
+          <span class="arrow">ဖတ်ရန် ➔</span>
+        `;
+        container.appendChild(div);
+      });
+    } else {
+      container.innerHTML = '<p style="text-align:center; color: var(--sub-text);">စာမူ မရှိသေးပါ။</p>';
+    }
+  }
+
+  function openChapter(item) {
+    document.getElementById('tocView').style.display = 'none';
+    document.getElementById('readerView').style.display = 'block';
     document.getElementById('readerTitle').innerText = item.title;
+    
     const contentEl = document.getElementById('readerContent');
     contentEl.innerText = item.content;
     contentEl.style.fontSize = currentFontSize + 'px';
 
+    viewStack.push("reader");
     window.scrollTo(0, 0);
   }
 
-  function showToc() {
-    document.getElementById('adminPanel').style.display = 'block';
-    document.getElementById('tocView').style.display = 'block';
-    document.getElementById('readerView').style.display = 'none';
-    document.getElementById('backBtn').style.display = 'none';
-  }
+  window.goBack = function() {
+    const lastView = viewStack.pop();
+    if (lastView === "reader") {
+      document.getElementById('readerView').style.display = 'none';
+      document.getElementById('tocView').style.display = 'block';
+    } else if (lastView === "toc") {
+      document.getElementById('tocView').style.display = 'none';
+      document.getElementById('bookshelfView').style.display = 'block';
+      document.getElementById('adminPanel').style.display = 'block';
+      document.getElementById('backBtn').style.display = 'none';
+      currentNovelId = "";
+    }
+  };
 
-  function changeFontSize(step) {
+  window.changeFontSize = function(step) {
     currentFontSize += step;
     const contentEl = document.getElementById('readerContent');
     if (contentEl) contentEl.style.fontSize = currentFontSize + 'px';
-  }
+  };
 
-  function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-  }
+  window.toggleDarkMode = function() {
+    document.body.classList.toggle('light-mode');
+  };
 </script>
 
 </body>
