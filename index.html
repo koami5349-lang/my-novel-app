@@ -48,9 +48,10 @@
     .admin-panel select, .admin-panel input, .admin-panel textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--input-bg); color: var(--text-color); font-family: inherit; box-sizing: border-box; }
     .admin-panel button { background: var(--accent-peach); color: #12131C; border: none; width: 100%; padding: 12px; font-weight: bold; }
     .novel-grid { display: grid; gap: 12px; }
-    .novel-card, .chapter-item { background: var(--card-bg); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 10px; }
-    .chapter-info { flex-grow: 1; display: flex; justify-content: space-between; align-items: center; }
+    .novel-card, .chapter-item { background: var(--card-bg); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .chapter-info { flex-grow: 1; display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-right: 10px; }
     .arrow, .reader-title { color: var(--accent-peach); font-weight: bold; }
+    .delete-btn { background: var(--danger-color); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
     #readerView { display: none; background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); }
     .reader-content { line-height: 2; white-space: pre-line; }
     #loading { text-align: center; font-style: italic; margin-top: 20px; color: var(--sub-text); }
@@ -112,7 +113,6 @@
 </div>
 
 <script>
-  // ထည့်သွင်းပြီးသား Google Apps Script Web App URL
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc1kYBHz4QtHpUSsX_6IpMceIwC9v6SIOsyk6AeB-DSOfNKCdNh_qVQ3o5CWScW51OtA/exec";
 
   let allChapters = [];
@@ -153,7 +153,7 @@
     try {
       await fetch(SCRIPT_URL, {
         method: "POST",
-        body: JSON.stringify({ novelId, title, content })
+        body: JSON.stringify({ action: "add", novelId, title, content })
       });
       btn.disabled = false;
       btn.innerText = "Publish";
@@ -165,6 +165,21 @@
       btn.disabled = false;
       btn.innerText = "Publish";
       alert('တင်ခြင်း မအောင်မြင်ပါ');
+    }
+  };
+
+  window.deleteChapter = async function(id) {
+    if (!confirm("ဒီအခန်းကို ဖျက်မှာ သေချာပါသလား?")) return;
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "delete", id: id })
+      });
+      alert('အောင်မြင်စွာ ဖျက်ပြီးပါပြီ!');
+      fetchChapters();
+    } catch (e) {
+      alert('ဖျက်ခြင်း မအောင်မြင်ပါ');
     }
   };
 
@@ -193,8 +208,9 @@
             <span>${item.title}</span>
             <span class="arrow">ဖတ်ရန် ➔</span>
           </div>
+          <button class="delete-btn" onclick="deleteChapter('${item.id}')">ဖျက်ရန်</button>
         `;
-        div.onclick = () => openChapter(item.title, item.content);
+        div.querySelector('.chapter-info').onclick = () => openChapter(item.title, item.content);
         container.appendChild(div);
       });
     } else {
