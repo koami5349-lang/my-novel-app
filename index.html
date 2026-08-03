@@ -24,7 +24,8 @@
       --input-bg: #fffbf7;
       --danger-color: #ff6b6b;
       --header-bg: rgba(255, 245, 247, 0.9);
-      --bg-image: url('https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1000'); /* Day mode background */
+      /* Day mode background ပုံလင့်ခ်ထည့်ရန် (ပထမပုံ) */
+      --bg-image: url('YOUR_DAY_IMAGE_LINK_HERE'); 
     }
 
     /* Night Mode (ဒုတိယပုံ - ညဘက်နောက်ခံနှင့် Theme) */
@@ -38,7 +39,8 @@
       --input-bg: #1a1f38;
       --danger-color: #ff8b94;
       --header-bg: rgba(26, 31, 56, 0.9);
-      --bg-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000'); /* Night mode background */
+      /* Night mode background ပုံလင့်ခ်ထည့်ရန် (ဒုတိယပုံ) */
+      --bg-image: url('YOUR_NIGHT_IMAGE_LINK_HERE'); 
     }
 
     body {
@@ -54,9 +56,38 @@
       transition: background 0.3s, color 0.3s;
     }
     .container { max-width: 650px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: var(--header-bg); backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    button, .back-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; font-family: inherit; }
-    .back-btn { background: var(--accent-glow); color: #fff; border: none; display: none; }
+    
+    header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 12px 18px; 
+      background: var(--header-bg); 
+      backdrop-filter: blur(8px); 
+      border-radius: 16px; 
+      border: 1px solid var(--border-color); 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    }
+
+    .controls { display: flex; gap: 8px; align-items: center; }
+    .theme-btn { 
+      background: var(--card-bg); 
+      color: var(--text-color); 
+      border: 1px solid var(--border-color); 
+      padding: 6px 12px; 
+      border-radius: 14px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover { border-color: var(--accent-glow); transform: translateY(-1px); }
+
+    .back-btn { background: var(--accent-glow); color: #fff; border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; display: none; }
     
     /* Admin Panel Style */
     .admin-panel { background: var(--card-bg); backdrop-filter: blur(10px); padding: 18px; border-radius: 16px; border: 2px dashed var(--accent-glow); margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; }
@@ -93,10 +124,13 @@
 <div class="container">
   <header>
     <button id="backBtn" class="back-btn" onclick="goBack()">← ပြန်ထွက်မည်</button>
-    <div class="controls">
-      <button onclick="changeFontSize(-1)">A-</button>
-      <button onclick="changeFontSize(1)">A+</button>
-      <button onclick="toggleDarkMode()">🌓</button>
+    <div class="controls" style="width: 100%; justify-content: space-between;">
+      <span style="font-weight: bold; color: var(--accent-glow); font-size: 0.95rem;">🌸 Sunflower Novels</span>
+      <div style="display: flex; gap: 6px;">
+        <button class="theme-btn" onclick="changeFontSize(-1)">A⁻</button>
+        <button class="theme-btn" onclick="changeFontSize(1)">A⁺</button>
+        <button class="theme-btn" onclick="toggleDarkMode()">🌓 Mode</button>
+      </div>
     </div>
   </header>
 
@@ -327,7 +361,7 @@
     window.scrollTo(0, 0);
   }
 
-  window.goBack = function() {
+  window.goBack = function`() {
     const lastView = viewStack.pop();
     if (lastView === "reader") {
       document.getElementById('readerView').style.display = 'none';
