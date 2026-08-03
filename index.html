@@ -25,6 +25,7 @@
       --accent-hover: #FFA070;
       --border-color: #2D2F45;
       --input-bg: #161724;
+      --danger-color: #FF6B6B;
     }
 
     body.light-mode {
@@ -36,6 +37,7 @@
       --accent-hover: #E87E4D;
       --border-color: #E2E4ED;
       --input-bg: #EDEEF5;
+      --danger-color: #E63946;
     }
 
     body {
@@ -87,6 +89,7 @@
       border-radius: 16px;
       border: 1px solid var(--border-color);
       margin-bottom: 24px;
+      display: none; /* စာဖတ်သူများအတွက် ပုံမှန်ပိတ်ထားမည် */
     }
 
     .admin-panel h3 {
@@ -182,14 +185,41 @@
       border-radius: 10px;
       border: 1px solid var(--border-color);
       margin-bottom: 10px;
-      cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .chapter-item:active {
+    .chapter-info {
+      cursor: pointer;
+      flex-grow: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-right: 10px;
+    }
+
+    .chapter-info:active {
       transform: scale(0.98);
+    }
+
+    .delete-btn {
+      background: rgba(255, 107, 107, 0.15);
+      color: var(--danger-color);
+      border: 1px solid var(--danger-color);
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+      font-weight: bold;
+      display: none; /* စာဖတ်သူများအတွက် ဖျက်ခလုတ် ဖုံးထားမည် */
+      transition: background 0.2s;
+    }
+
+    .delete-btn:hover {
+      background: var(--danger-color);
+      color: #FFF;
     }
 
     .arrow {
@@ -240,7 +270,7 @@
     </div>
   </header>
 
-  <!-- Admin Panel -->
+  <!-- Admin Panel (Admin များအတွက်သာ ပေါ်မည်) -->
   <div class="admin-panel" id="adminPanel">
     <h3>✍️ စာမူအသစ် တင်ရန်</h3>
     <select id="novelSelect">
@@ -298,7 +328,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBDR13h_lXr2lIuYYgL89xXy51kYqVU-8Y",
@@ -318,15 +348,48 @@
   let currentNovelId = "";
   let currentFontSize = 16;
   let viewStack = ["bookshelf"];
+  let isAdmin = false;
+
+  // Telegram User ID စစ်ဆေးခြင်း (သင့်ရဲ့ Telegram Account ID ကို ဤနေရာတွင် ထည့်ပါ)
+  // ဥပမာ: const ADMIN_ID = 123456789; 
+  // အကယ်၍ အတိအကျ မသိသေးပါက ပထမအကြိမ် ဝင်ချိန်တွင် Console/Alert ဖြင့် စစ်နိုင်ပါသည်။
+  // လောလောဆယ်တွင် Test လုပ်ရန် Web App ဖွင့်သူတိုင်းကို Admin အဖြစ် ခေတ္တသတ်မှတ်ပေးရန် Telegram WebApp initData ကို စစ်ပါမည်။
+  
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  // သင့်ရဲ့ Telegram User ID ကို သိရှိလိုပါက tg.initDataUnsafe?.user?.id ဖြင့် စစ်နိုင်ပါသည်။
+  // ဤနေရာတွင် သင့်ကိုယ်ပိုင် Telegram ID ထည့်ပေးရပါမည် (ဥပမာ - 123456789)
+  const MY_ADMIN_TELEGRAM_ID = 0; // <--- သင့် Telegram ID ထည့်ရန် (သို့မဟုတ် Test ရန် 0 ထားလျှင် အောက်ပါအတိုင်း စစ်ပါမည်)
+
+  // လွယ်ကူစေရန်: Telegram Bot ထဲမှ ကိုယ်တိုင်ဝင်လျှင် Admin ပေါ်စေရန် စစ်ဆေးချက်
+  if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    const userId = tg.initDataUnsafe.user.id;
+    // သင့် Telegram ID ထည့်ထားလျှင် ဤနေရာတွင် စစ်ဆေးမည် (သို့မဟုတ် လောလောဆယ် Bot တည်ထောင်သူဖြစ်မို့ အလိုအလျောက် Admin ပေးထားရန် အောက်တွင် စစ်ပါ)
+    isAdmin = true; // Bot ထဲကနေ ဝင်လာသူကို Admin အဖြစ် သတ်မှတ်ရန် (သို့မဟုတ် သင့် ID သီးသန့်စစ်လိုက userId === YOUR_ID ထည့်ပါ)
+  } else {
+    // Browser ကနေ သီးသန့်ဝင်ကြည့်ရင် စာဖတ်သူ (Reader) အဖြစ် သတ်မှတ်မည်
+    isAdmin = false; 
+  }
+
+  // အကယ်၍ သင်ကိုယ်တိုင် Admin Panel ကို ချက်ချင်းမြင်ရရန်
+  isAdmin = true; // (သင်ကိုယ်တိုင် တင်မည့်သူဖြစ်ို့ကြောင့် True ထားပေးသည်၊ စာဖတ်သူများအတွက် လိုသလို ပြင်နိုင်ပါသည်)
+
+  if (isAdmin) {
+    document.getElementById('adminPanel').style.display = 'block';
+  }
 
   const novelsRef = ref(database, 'novels');
   onValue(novelsRef, (snapshot) => {
     document.getElementById('loading').style.display = 'none';
     allNovelsData = snapshot.val() || {};
     if (currentNovelId) renderChapters(currentNovelId);
+  }, (error) => {
+    document.getElementById('loading').style.display = 'none';
+    console.error("Database Read Error:", error);
   });
 
-  window.publishChapter = function() {
+  window.publishChapter = async function() {
     const novelId = document.getElementById('novelSelect').value;
     const titleInput = document.getElementById('chapTitle');
     const contentInput = document.getElementById('chapContent');
@@ -343,28 +406,48 @@
     btn.disabled = true;
     btn.innerText = "တင်နေပါသည်...";
 
-    push(ref(database, `novels/${novelId}/chapters`), {
-      title: title,
-      content: content,
-      timestamp: Date.now()
-    }).then(() => {
+    try {
+      const chapterListRef = ref(database, `novels/${novelId}/chapters`);
+      await push(chapterListRef, {
+        title: title,
+        content: content,
+        timestamp: Date.now()
+      });
+
       btn.disabled = false;
       btn.innerText = "Publish";
       titleInput.value = '';
       contentInput.value = '';
       alert('စာမူအသစ်ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။');
-    }).catch((error) => {
+    } catch (error) {
       btn.disabled = false;
       btn.innerText = "Publish";
       alert('စာမူတင်ခြင်း မအောင်မြင်ပါ: ' + error.message);
-    });
+    }
+  };
+
+  // စာမူဖျက်ရန် Function
+  window.deleteChapter = async function(novelId, chapterKey, event) {
+    event.stopPropagation(); // ကတ်ကို နှိပ်မိပြီး စာဖတ်မျက်နှာ ပွင့်သွားခြင်း မဖြစ်စေရန်
+    
+    if (confirm("ဒီအခန်းကို ဖျက်မှာ သေချာပါသလား?")) {
+      try {
+        const chapterRef = ref(database, `novels/${novelId}/chapters/${chapterKey}`);
+        await remove(chapterRef);
+        alert("အခန်းကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။");
+      } catch (error) {
+        alert("ဖျက်ခြင်း မအောင်မြင်ပါ: " + error.message);
+      }
+    }
   };
 
   window.openNovel = function(novelId, title) {
     currentNovelId = novelId;
     document.getElementById('selectedNovelTitle').innerText = "📖 " + title;
     document.getElementById('bookshelfView').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'none';
+    if (isAdmin) {
+      document.getElementById('adminPanel').style.display = 'none';
+    }
     document.getElementById('tocView').style.display = 'block';
     document.getElementById('backBtn').style.display = 'inline-block';
 
@@ -382,12 +465,20 @@
         const item = chapters[key];
         const div = document.createElement('div');
         div.className = 'chapter-item';
-        div.onclick = () => openChapter(item);
+        
         div.innerHTML = `
-          <span>${item.title}</span>
-          <span class="arrow">ဖတ်ရန် ➔</span>
+          <div class="chapter-info" onclick='openChapter(${JSON.stringify(item)})'>
+            <span>${item.title}</span>
+            <span class="arrow">ဖတ်ရန် ➔</span>
+          </div>
+          <button class="delete-btn" id="del-${key}" onclick="deleteChapter('${novelId}', '${key}', event)">ဖျက်မည်</button>
         `;
         container.appendChild(div);
+
+        // အကယ်၍ Admin ဖြစ်မှသာ ဖျက်ရန် ခလုတ်ကို ပြသမည်
+        if (isAdmin) {
+          document.getElementById(`del-${key}`).style.display = 'inline-block';
+        }
       });
     } else {
       container.innerHTML = '<p style="text-align:center; color: var(--sub-text);">စာမူ မရှိသေးပါ။</p>';
@@ -415,7 +506,9 @@
     } else if (lastView === "toc") {
       document.getElementById('tocView').style.display = 'none';
       document.getElementById('bookshelfView').style.display = 'block';
-      document.getElementById('adminPanel').style.display = 'block';
+      if (isAdmin) {
+        document.getElementById('adminPanel').style.display = 'block';
+      }
       document.getElementById('backBtn').style.display = 'none';
       currentNovelId = "";
     }
