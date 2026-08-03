@@ -11,9 +11,9 @@
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-  <!-- Firebase JS SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <!-- Firebase JS SDKs (Updated Links) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <style>
     :root {
@@ -69,7 +69,7 @@
       background: var(--primary-color);
       color: white;
       border: none;
-      display: none; /* စာဖတ်နေချိန်မှ ပေါ်မည် */
+      display: none;
     }
 
     .admin-panel {
@@ -104,7 +104,12 @@
       font-weight: bold;
     }
 
-    /* Table of Contents (Wattpad Style List) */
+    .admin-panel button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Table of Contents List */
     .toc-title {
       font-size: 1.1rem;
       font-weight: bold;
@@ -122,11 +127,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: transform 0.1s, border-color 0.2s;
-    }
-
-    .chapter-item:hover {
-      border-color: var(--primary-color);
     }
 
     .chapter-item:active {
@@ -143,7 +143,7 @@
       font-size: 0.9rem;
     }
 
-    /* Chapter Full Content View */
+    /* Reader View */
     #readerView {
       display: none;
       background: var(--card-bg);
@@ -186,7 +186,6 @@
     </div>
   </header>
 
-  <!-- စာမူတင်သည့် Admin Panel -->
   <div class="admin-panel" id="adminPanel">
     <h3>စာမူအသစ် တင်ရန်</h3>
     <input type="text" id="chapTitle" placeholder="အခန်းခေါင်းစဉ် (ဥပမာ - အခန်း ၁)">
@@ -196,13 +195,11 @@
 
   <div id="loading">စာမူများ ရယူနေပါသည်...</div>
 
-  <!-- Table of Contents (အခန်းစာရင်း View) -->
   <div id="tocView">
     <div class="toc-title">📖 အခန်းများ စာရင်း</div>
     <div id="tocContainer"></div>
   </div>
 
-  <!-- စာမူအပြည့်အစုံ ဖတ်သည့် View -->
   <div id="readerView">
     <div id="readerTitle" class="reader-title"></div>
     <div id="readerContent" class="reader-content"></div>
@@ -227,7 +224,6 @@
   let chaptersData = {};
   let currentFontSize = 16;
 
-  // Firebase မှ စာမူများဆွဲယူခြင်း
   database.ref('chapters').on('value', (snapshot) => {
     const tocContainer = document.getElementById('tocContainer');
     const loading = document.getElementById('loading');
@@ -237,7 +233,6 @@
     chaptersData = snapshot.val() || {};
 
     if (Object.keys(chaptersData).length > 0) {
-      // အခန်း ၁၊ အခန်း ၂ အစဉ်လိုက် ပြပေးရန် (သို့မဟုတ် တင်သည့်အစဉ်အတိုင်း)
       Object.keys(chaptersData).forEach(key => {
         const item = chaptersData[key];
         const itemDiv = document.createElement('div');
@@ -252,9 +247,43 @@
     } else {
       tocContainer.innerHTML = '<p style="text-align:center; color: #888;">စာမူ မရှိသေးပါ။</p>';
     }
+  }, (error) => {
+    document.getElementById('loading').innerText = 'Database အမှားအယွင်း ရှိနေပါသည်။';
   });
 
-  // အခန်းတစ်ခန်းကို နှိပ်လိုက်သည့်အခါ စာမူဖွင့်ခြင်း
+  function publishChapter() {
+    const titleInput = document.getElementById('chapTitle');
+    const contentInput = document.getElementById('chapContent');
+    const btn = document.getElementById('pubBtn');
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+
+    if (!title || !content) {
+      alert('ခေါင်းစဉ်နှင့် စာမူ အပြည့်အစုံ ဖြည့်ပေးပါ။');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "တင်နေပါသည်...";
+
+    database.ref('chapters').push({
+      title: title,
+      content: content,
+      timestamp: Date.now()
+    }).then(() => {
+      btn.disabled = false;
+      btn.innerText = "Publish မူဝါဒဖြင့် တင်မည်";
+      titleInput.value = '';
+      contentInput.value = '';
+      alert('စာမူအသစ်ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။');
+    }).catch((error) => {
+      btn.disabled = false;
+      btn.innerText = "Publish မူဝါဒဖြင့် တင်မည်";
+      alert('စာမူတင်ခြင်း မအောင်မြင်ပါ: ' + error.message);
+    });
+  }
+
   function openChapter(key) {
     const item = chaptersData[key];
     if (!item) return;
@@ -272,48 +301,11 @@
     window.scrollTo(0, 0);
   }
 
-  // အခန်းစာရင်း ပင်မစာမျက်နှာသို့ ပြန်သွားခြင်း
   function showToc() {
     document.getElementById('adminPanel').style.display = 'block';
     document.getElementById('tocView').style.display = 'block';
     document.getElementById('readerView').style.display = 'none';
     document.getElementById('backBtn').style.display = 'none';
-  }
-
-  // စာမူတင်သည့် Function
-  function publishChapter() {
-    const titleInput = document.getElementById('chapTitle');
-    const contentInput = document.getElementById('chapContent');
-    const btn = document.getElementById('pubBtn');
-
-    const title = titleInput.value.trim();
-    const content = contentInput.value.trim();
-
-    if (!title || !content) {
-      alert('ခေါင်းစဉ်နှင့် စာမူ အပြည့်အစုံ ဖြည့်ပေးပါ။');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerText = "တင်နေပါသည်...";
-
-    const newChapRef = database.ref('chapters').push();
-    newChapRef.set({
-      title: title,
-      content: content,
-      timestamp: Date.now()
-    }, (error) => {
-      btn.disabled = false;
-      btn.innerText = "Publish မူဝါဒဖြင့် တင်မည်";
-
-      if (error) {
-        alert('စာမူတင်ခြင်း မအောင်မြင်ပါ။');
-      } else {
-        titleInput.value = '';
-        contentInput.value = '';
-        alert('စာမူအသစ်ကို အောင်မြင်စွာ တက်သွားပါပြီ။');
-      }
-    });
   }
 
   function changeFontSize(step) {
