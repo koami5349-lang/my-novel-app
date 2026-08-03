@@ -89,7 +89,7 @@
       border-radius: 16px;
       border: 1px solid var(--border-color);
       margin-bottom: 24px;
-      display: none; /* စာဖတ်သူများအတွက် ပုံမှန်ပိတ်ထားမည် */
+      display: none;
     }
 
     .admin-panel h3 {
@@ -188,6 +188,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
 
     .chapter-info {
@@ -196,11 +197,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-right: 10px;
     }
 
     .chapter-info:active {
       transform: scale(0.98);
+    }
+
+    .chapter-title-text {
+      flex-grow: 1;
+      padding-right: 10px;
+      word-break: break-word;
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .delete-btn {
@@ -213,7 +226,7 @@
       font-size: 0.85rem;
       font-family: inherit;
       font-weight: bold;
-      display: none; /* စာဖတ်သူများအတွက် ဖျက်ခလုတ် ဖုံးထားမည် */
+      display: none;
       transition: background 0.2s;
     }
 
@@ -225,6 +238,7 @@
     .arrow {
       color: var(--accent-peach);
       font-weight: bold;
+      white-space: nowrap;
     }
 
     #readerView {
@@ -270,7 +284,7 @@
     </div>
   </header>
 
-  <!-- Admin Panel (Admin များအတွက်သာ ပေါ်မည်) -->
+  <!-- Admin Panel -->
   <div class="admin-panel" id="adminPanel">
     <h3>✍️ စာမူအသစ် တင်ရန်</h3>
     <select id="novelSelect">
@@ -348,32 +362,10 @@
   let currentNovelId = "";
   let currentFontSize = 16;
   let viewStack = ["bookshelf"];
-  let isAdmin = false;
+  let isAdmin = true; // Admin အဖြစ် သတ်မှတ်ထားသည်
 
-  // Telegram User ID စစ်ဆေးခြင်း (သင့်ရဲ့ Telegram Account ID ကို ဤနေရာတွင် ထည့်ပါ)
-  // ဥပမာ: const ADMIN_ID = 123456789; 
-  // အကယ်၍ အတိအကျ မသိသေးပါက ပထမအကြိမ် ဝင်ချိန်တွင် Console/Alert ဖြင့် စစ်နိုင်ပါသည်။
-  // လောလောဆယ်တွင် Test လုပ်ရန် Web App ဖွင့်သူတိုင်းကို Admin အဖြစ် ခေတ္တသတ်မှတ်ပေးရန် Telegram WebApp initData ကို စစ်ပါမည်။
-  
   const tg = window.Telegram.WebApp;
   tg.expand();
-
-  // သင့်ရဲ့ Telegram User ID ကို သိရှိလိုပါက tg.initDataUnsafe?.user?.id ဖြင့် စစ်နိုင်ပါသည်။
-  // ဤနေရာတွင် သင့်ကိုယ်ပိုင် Telegram ID ထည့်ပေးရပါမည် (ဥပမာ - 123456789)
-  const MY_ADMIN_TELEGRAM_ID = 0; // <--- သင့် Telegram ID ထည့်ရန် (သို့မဟုတ် Test ရန် 0 ထားလျှင် အောက်ပါအတိုင်း စစ်ပါမည်)
-
-  // လွယ်ကူစေရန်: Telegram Bot ထဲမှ ကိုယ်တိုင်ဝင်လျှင် Admin ပေါ်စေရန် စစ်ဆေးချက်
-  if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    const userId = tg.initDataUnsafe.user.id;
-    // သင့် Telegram ID ထည့်ထားလျှင် ဤနေရာတွင် စစ်ဆေးမည် (သို့မဟုတ် လောလောဆယ် Bot တည်ထောင်သူဖြစ်မို့ အလိုအလျောက် Admin ပေးထားရန် အောက်တွင် စစ်ပါ)
-    isAdmin = true; // Bot ထဲကနေ ဝင်လာသူကို Admin အဖြစ် သတ်မှတ်ရန် (သို့မဟုတ် သင့် ID သီးသန့်စစ်လိုက userId === YOUR_ID ထည့်ပါ)
-  } else {
-    // Browser ကနေ သီးသန့်ဝင်ကြည့်ရင် စာဖတ်သူ (Reader) အဖြစ် သတ်မှတ်မည်
-    isAdmin = false; 
-  }
-
-  // အကယ်၍ သင်ကိုယ်တိုင် Admin Panel ကို ချက်ချင်းမြင်ရရန်
-  isAdmin = true; // (သင်ကိုယ်တိုင် တင်မည့်သူဖြစ်ို့ကြောင့် True ထားပေးသည်၊ စာဖတ်သူများအတွက် လိုသလို ပြင်နိုင်ပါသည်)
 
   if (isAdmin) {
     document.getElementById('adminPanel').style.display = 'block';
@@ -426,10 +418,8 @@
     }
   };
 
-  // စာမူဖျက်ရန် Function
   window.deleteChapter = async function(novelId, chapterKey, event) {
-    event.stopPropagation(); // ကတ်ကို နှိပ်မိပြီး စာဖတ်မျက်နှာ ပွင့်သွားခြင်း မဖြစ်စေရန်
-    
+    event.stopPropagation();
     if (confirm("ဒီအခန်းကို ဖျက်မှာ သေချာပါသလား?")) {
       try {
         const chapterRef = ref(database, `novels/${novelId}/chapters/${chapterKey}`);
@@ -468,14 +458,15 @@
         
         div.innerHTML = `
           <div class="chapter-info" onclick='openChapter(${JSON.stringify(item)})'>
-            <span>${item.title}</span>
+            <span class="chapter-title-text">${item.title}</span>
             <span class="arrow">ဖတ်ရန် ➔</span>
           </div>
-          <button class="delete-btn" id="del-${key}" onclick="deleteChapter('${novelId}', '${key}', event)">ဖျက်မည်</button>
+          <div class="action-group">
+            <button class="delete-btn" id="del-${key}" onclick="deleteChapter('${novelId}', '${key}', event)">ဖျက်</button>
+          </div>
         `;
         container.appendChild(div);
 
-        // အကယ်၍ Admin ဖြစ်မှသာ ဖျက်ရန် ခလုတ်ကို ပြသမည်
         if (isAdmin) {
           document.getElementById(`del-${key}`).style.display = 'inline-block';
         }
