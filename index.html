@@ -7,6 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Sunflower Novels</title>
+
+  <!-- Google Web Fonts for Standard Unicode Myanmar -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -34,12 +39,13 @@
     }
 
     body {
-      font-family: 'Padauk', 'Pyidaungsu', sans-serif;
+      font-family: 'Noto Sans Myanmar', 'Pyidaungsu', 'Padauk', sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
       padding: 16px;
       transition: background-color 0.3s, color 0.3s;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
@@ -64,6 +70,7 @@
       border-radius: 20px;
       cursor: pointer;
       font-weight: bold;
+      font-family: inherit;
       transition: all 0.2s;
     }
 
@@ -98,6 +105,7 @@
       background: var(--input-bg);
       color: var(--text-color);
       font-family: inherit;
+      font-size: 0.95rem;
     }
 
     .admin-panel button {
@@ -110,6 +118,7 @@
       width: 100%;
       font-size: 1rem;
       font-weight: bold;
+      font-family: inherit;
       transition: background 0.2s;
     }
 
@@ -125,7 +134,6 @@
       color: var(--accent-peach);
     }
 
-    /* Novel Cards (Bookshelf) */
     .novel-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -168,7 +176,6 @@
       margin-top: 4px;
     }
 
-    /* Chapter List */
     .chapter-item {
       background: var(--card-bg);
       padding: 14px 16px;
@@ -190,7 +197,6 @@
       font-weight: bold;
     }
 
-    /* Reader View */
     #readerView {
       display: none;
       background: var(--card-bg);
@@ -209,8 +215,9 @@
     }
 
     .reader-content {
-      line-height: 1.9;
+      line-height: 2;
       white-space: pre-line;
+      letter-spacing: 0.2px;
     }
 
     #loading {
@@ -237,7 +244,7 @@
   <div class="admin-panel" id="adminPanel">
     <h3>✍️ စာမူအသစ် တင်ရန်</h3>
     <select id="novelSelect">
-      <option value="novel1">သတ်ဖြတ်ခြင်းအမိန့်တော်</option>
+      <option value="novel1">ချူဆန်းရဲ့ကလေးများနေ့</option>
       <option value="novel2">ဝတ္ထုအမှတ် (၂)</option>
       <option value="novel3">ဝတ္ထုအမှတ် (၃)</option>
     </select>
@@ -248,13 +255,13 @@
 
   <div id="loading">စာမူများ ရယူနေပါသည်...</div>
 
-  <!-- 1. Bookshelf View (ဝတ္ထုများ စာရင်း) -->
+  <!-- 1. Bookshelf View -->
   <div id="bookshelfView">
     <div class="section-title">📚 ဝတ္ထုများ စာရင်း</div>
     <div class="novel-grid">
-      <div class="novel-card" onclick="openNovel('novel1', 'သတ်ဖြတ်ခြင်းအမိန့်တော်')">
+      <div class="novel-card" onclick="openNovel('novel1', 'ချူဆန်းရဲ့ကလေးများနေ့')">
         <div class="novel-info">
-          <span class="novel-title">သတ်ဖြတ်ခြင်းအမိန့်တော်</span>
+          <span class="novel-title">ချူဆန်းရဲ့ကလေးများနေ့</span>
           <span class="novel-tag">ဝတ္ထုဖတ်ရန် နှိပ်ပါ</span>
         </div>
         <span class="arrow">➔</span>
