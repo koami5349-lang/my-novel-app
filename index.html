@@ -457,7 +457,7 @@
         div.className = 'chapter-item';
         
         div.innerHTML = `
-          <div class="chapter-info" onclick='openChapter(${JSON.stringify(item)})'>
+          <div class="chapter-info" id="chap-info-${key}">
             <span class="chapter-title-text">${item.title}</span>
             <span class="arrow">ဖတ်ရန် ➔</span>
           </div>
@@ -466,6 +466,11 @@
           </div>
         `;
         container.appendChild(div);
+
+        // Event Listener ကို သီးသန့်ချိတ်ဆက်ပေးခြင်းဖြင့် Error လုံးဝမဖြစ်စေပါ
+        document.getElementById(`chap-info-${key}`).onclick = function() {
+          openChapter(item.title, item.content);
+        };
 
         if (isAdmin) {
           document.getElementById(`del-${key}`).style.display = 'inline-block';
@@ -476,13 +481,13 @@
     }
   }
 
-  function openChapter(item) {
+  function openChapter(title, content) {
     document.getElementById('tocView').style.display = 'none';
     document.getElementById('readerView').style.display = 'block';
-    document.getElementById('readerTitle').innerText = item.title;
+    document.getElementById('readerTitle').innerText = title;
     
     const contentEl = document.getElementById('readerContent');
-    contentEl.innerText = item.content;
+    contentEl.innerText = content;
     contentEl.style.fontSize = currentFontSize + 'px';
 
     viewStack.push("reader");
